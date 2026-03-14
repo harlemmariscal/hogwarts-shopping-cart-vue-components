@@ -2,7 +2,12 @@
     <div>
         <CartTitle :username="username"></CartTitle>
         <div class="cart-container">
-            <CartList class="cart-list" :cartItems="shoppingCartItems"></CartList>
+            <CartList
+            class="cart-list"
+            :cartItems="shoppingCartItems"
+            @item-remove="removeitem($event)"
+            @quantity-update="updateQuantity($event)"
+            ></CartList>
             <OrderSummary
               class="order-summary"
               :cartItems="shoppingCartItems"
@@ -15,7 +20,7 @@
 import CartTitle from './CartTitle.vue';
 import CartList from './CartList.vue';
 import OrderSummary from './OrderSummary.vue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 let username = ref('Harry')
 let shoppingCartItems = ref([
@@ -60,6 +65,31 @@ let shoppingCartItems = ref([
     image: 'src/assets/img/Nimbus2000.jpg'
   }
 ])
+
+function removeitem(id) {
+  let index = shoppingCartItems.value.findIndex(item => item.id == id)
+  shoppingCartItems.value.splice(index, 1)
+}
+
+function updateQuantity(val) {
+  const { id, newQuantity } = val
+  shoppingCartItems.value.some((item) => {
+    if (item.id === id) {
+      item.quantity = parseInt(newQuantity)
+      return true
+    }
+  })
+}
+
+watch(
+  shoppingCartItems,
+  () => {
+    localStorage.setItem('shoppingCartItems',
+    JSON.stringify(shoppingCartItems.value))
+  },
+  { deep: true }
+)
+
 </script>
 
 
